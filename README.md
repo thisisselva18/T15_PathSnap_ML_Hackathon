@@ -146,6 +146,13 @@ Reproduce the full search from the repository root with:
 python scripts/tune_bayes.py --model mlp --max-rows 150000 --n-trials 30 --timeout 900
 ```
 
+The tuner refuses to overwrite an existing study or model. To repeat the run
+while preserving the recorded result, use fresh output paths:
+
+```powershell
+python scripts/tune_bayes.py --model mlp --max-rows 150000 --n-trials 30 --timeout 900 --output-dir results/mlp_tuning_rerun --model-output artifacts/models/mlp_tuned_rerun.joblib
+```
+
 The tuner reads `data/processed/post_correction/`, samples complete eligible
 observation groups up to 150,000 candidate rows using the shared seed and feature
 schema, and optimizes mean observation-manifest Top-1 over three trip-grouped

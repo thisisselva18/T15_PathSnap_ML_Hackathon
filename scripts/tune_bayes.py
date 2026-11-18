@@ -68,6 +68,8 @@ def main():
     parser.add_argument("--timeout", type=int, default=900)
     parser.add_argument("--data-dir", default="data/processed/post_correction")
     parser.add_argument("--output-dir", default=None)
+    parser.add_argument("--model-output", default=None,
+                        help="optional separate path for the fitted artifact when preserving earlier runs")
     args = parser.parse_args()
     if args.max_rows <= 0 or args.n_trials < 1 or args.timeout <= 0:
         parser.error("--max-rows, --n-trials and --timeout must be positive")
@@ -80,7 +82,10 @@ def main():
     out = Path(args.output_dir) if args.output_dir else ROOT / "results" / ("mlp_tuning_smoke" if smoke else "mlp_tuning")
     if not out.is_absolute():
         out = ROOT / out
-    model_path = ARTIFACTS / "models" / ("mlp_tuned_smoke.joblib" if smoke else "mlp_tuned.joblib")
+    model_path = Path(args.model_output) if args.model_output else (
+        ARTIFACTS / "models" / ("mlp_tuned_smoke.joblib" if smoke else "mlp_tuned.joblib"))
+    if not model_path.is_absolute():
+        model_path = ROOT / model_path
     if (out / "optuna_mlp.db").exists() or (out / "best_params_mlp.json").exists() or model_path.exists():
         raise FileExistsError(f"Refusing to overwrite a prior tuning run: {out} or {model_path}")
 
