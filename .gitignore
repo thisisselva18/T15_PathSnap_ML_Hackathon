@@ -1,12 +1,30 @@
-# data (raw + evaluator data never committed)
+# Raw data and evaluator data remain local.
 data/raw/
 data/eval/
-data/processed/*.parquet
+data/processed/
+!data/processed/
+data/processed/*
+!data/processed/post_correction/
+data/processed/post_correction/*
+!data/processed/post_correction/dataset_config.json
+!data/processed/post_correction/feature_list.json
+!data/processed/post_correction/training_sample_config.json
 # python
 __pycache__/
 *.pyc
 .venv/
 .ipynb_checkpoints/
+.pytest_cache/
+
+# test coverage, temporary and editor swap files
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+*.tmp
+*.temp
+*.swp
+*.swo
 # os / editor
 .DS_Store
 Thumbs.db
@@ -15,6 +33,13 @@ Thumbs.db
 # secrets
 .env
 
-# per-model files shared via Drive, not git (can be large)
-artifacts/models/
-results/preds/
+# Generated model files are local except for the selected MLP baseline.
+artifacts/models/*
+!artifacts/models/mlp_baseline_verified/
+artifacts/models/mlp_baseline_verified/*
+!artifacts/models/mlp_baseline_verified/mlp.joblib
+
+# Generated experiment outputs are local except for the authoritative MLP-only
+# baseline reports, predictions, plots, and configuration.
+results/*
+!results/mlp_baseline_verified/

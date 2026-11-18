@@ -3,7 +3,7 @@ pandas
 pyarrow
 scipy
 shapely>=2.0
-pyproj
+pyproj>=3.6
 scikit-learn
 lightgbm
 optuna

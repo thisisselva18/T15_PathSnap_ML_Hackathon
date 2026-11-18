@@ -1,0 +1,40 @@
+{
+  "candidate_config": {
+    "radius_m": 50,
+    "k": 8,
+    "gap_s": 60,
+    "max_speed_ms": 70,
+    "crop_margin_m": 200,
+    "obs_stride_for_training": 3
+  },
+  "features": [
+    "dist",
+    "cand_rank",
+    "dist_minus_min",
+    "dist_ratio",
+    "n_cands",
+    "t_frac",
+    "past_end",
+    "arc_len",
+    "head_diff",
+    "head_cos",
+    "head_valid",
+    "speed",
+    "dt_prev",
+    "ctx_mean_dist",
+    "dist_prev",
+    "out_deg_v",
+    "in_deg_u",
+    "has_twin",
+    "conn_prev_top3"
+  ],
+  "projection": "per-trip UTM via PyProj; missing dependency is an error",
+  "candidate_search": "Shapely 2 STRtree dwithin; exact exhaustive segment-distance fallback",
+  "geometry_dependencies": {
+    "pyproj": "3.8.0",
+    "shapely": "2.2.0"
+  },
+  "label_alignment": "existing monotone route dynamic program; questionable distances and disconnected route transitions are diagnosed, not relabeled",
+  "alignment_questionable_distance_threshold_m": 50.0,
+  "evaluator_test_touched": false
+}

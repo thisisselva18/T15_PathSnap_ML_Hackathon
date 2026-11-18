@@ -17,8 +17,42 @@ import numpy as np
 from .geo import point_segment
 
 
-def align_points_to_route(txy, t, seg_id, route, A, B, max_skip=8, free_jump_dt=5.0):
-    """Return (ref_arc_id[N], ref_dist[N]). A, B: start/end xy of every arc (indexed by arc id)."""
+def align_points_to_route(txy, t, seg_id, route, A, B, max_skip=8, free_jump_dt=5.0,
+                          return_diagnostics=False):
+    """Align observations monotonically to route arc positions.
+
+    The existing alignment rule is preserved. Inputs are checked explicitly, and optional
+    diagnostics expose route positions and distance/jump summaries without changing labels.
+    """
+    txy = np.asarray(txy, dtype=float)
+    t = np.asarray(t, dtype=float)
+    seg_id = np.asarray(seg_id)
+    route_raw = np.asarray(route)
+    A, B = np.asarray(A, dtype=float), np.asarray(B, dtype=float)
+    if txy.ndim != 2 or txy.shape[1] != 2 or t.ndim != 1 or seg_id.ndim != 1:
+        raise ValueError("txy must be (N,2); t and seg_id must be 1-D")
+    if len(txy) == 0 or len(route_raw) == 0:
+        raise ValueError("track observations and route must both be non-empty")
+    if len(t) != len(txy) or len(seg_id) != len(txy):
+        raise ValueError("txy, t, and seg_id must have the same observation count")
+    if not np.issubdtype(seg_id.dtype, np.integer) or np.any(seg_id < 0) or np.any(np.diff(seg_id) < 0):
+        raise ValueError("seg_id must be non-negative, integer, and non-decreasing")
+    if A.ndim != 2 or A.shape[1] != 2 or B.shape != A.shape:
+        raise ValueError("A and B must have shape (n_arcs, 2)")
+    if not all(np.isfinite(x).all() for x in (txy, t, A, B)):
+        raise ValueError("track, time, and route geometry inputs must be finite")
+    if np.any(np.diff(t) < 0):
+        raise ValueError("timestamps must be non-decreasing after cleaning")
+    if not np.issubdtype(route_raw.dtype, np.integer):
+        if not np.issubdtype(route_raw.dtype, np.number) or not np.equal(route_raw, np.floor(route_raw)).all():
+            raise ValueError("route arc IDs must be integers")
+    route = route_raw.astype(np.int64)
+    if np.any(route < 0) or np.any(route >= len(A)):
+        raise ValueError("route contains arc IDs outside the arc geometry table")
+    if not isinstance(max_skip, (int, np.integer)) or max_skip < 1 or max_skip > 255:
+        raise ValueError("max_skip must be an integer between 1 and 255")
+    if not np.isfinite(free_jump_dt) or free_jump_dt < 0:
+        raise ValueError("free_jump_dt must be finite and non-negative")
     N, M = len(txy), len(route)
     ax, ay = A[route, 0], A[route, 1]
     bx, by = B[route, 0], B[route, 1]
@@ -63,4 +97,16 @@ def align_points_to_route(txy, t, seg_id, route, A, B, max_skip=8, free_jump_dt=
 
     ref_arc = route[path]
     ref_dist = point_segment(txy[:, 0], txy[:, 1], A[ref_arc, 0], A[ref_arc, 1], B[ref_arc, 0], B[ref_arc, 1])[0]
-    return ref_arc, ref_dist
+    if not return_diagnostics:
+        return ref_arc, ref_dist
+    position_steps = np.diff(path)
+    diagnostics = {
+        "route_positions": path,
+        "position_monotone": bool(np.all(position_steps >= 0)),
+        "n_position_jumps_over_max_skip": int(np.sum(position_steps > max_skip)),
+        "n_ref_dist_gt_50m": int(np.sum(ref_dist > 50.0)),
+        "n_ref_dist_gt_100m": int(np.sum(ref_dist > 100.0)),
+        "ref_dist_p95_m": float(np.percentile(ref_dist, 95)),
+        "ref_dist_max_m": float(np.max(ref_dist)),
+    }
+    return ref_arc, ref_dist, diagnostics
