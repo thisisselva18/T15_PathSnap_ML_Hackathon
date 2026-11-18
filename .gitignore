@@ -1,0 +1,16 @@
+# data (raw + evaluator data never committed)
+data/raw/
+data/eval/
+data/processed/*.parquet
+# python
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+# os / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+# secrets
+.env

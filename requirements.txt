@@ -1,0 +1,18 @@
+numpy
+pandas
+pyarrow
+scipy
+shapely>=2.0
+pyproj
+scikit-learn
+lightgbm
+optuna
+joblib
+matplotlib
+folium
+fastapi
+uvicorn[standard]
+requests
+streamlit
+streamlit-folium
+# Pin exact versions before submission:  pip freeze > requirements-lock.txt
