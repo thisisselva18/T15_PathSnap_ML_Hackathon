@@ -56,3 +56,11 @@ results/confusion/*
 results/curves/*
 !results/curves/mlp.json
 !results/curves/mlp.png
+# HMM/Viterbi decoder results (P3) and report figures
+!results/hmm_comparison.csv
+!results/hmm_comparison_summary.json
+!results/hmm_comparison_defaults.csv
+!results/hmm_comparison_defaults_summary.json
+!results/optuna_trials_hmm.csv
+!results/hmm_eval_log.txt
+!results/figures/

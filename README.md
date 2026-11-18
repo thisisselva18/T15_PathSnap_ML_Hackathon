@@ -21,7 +21,7 @@ committed to Git. Rebuild them with the dataset command below when needed.
 1. `python scripts/build_dataset.py` -> candidate-level train and student-test tables in `data/processed/`
 2. `python scripts/train_models.py --model <name> --laptop L2` -> grouped CV and evaluation outputs
 3. `python scripts/tune_bayes.py` -> `results/optuna.db`, `artifacts/model.joblib`
-4. `python scripts/eval_hmm.py` -> `results/hmm_comparison.csv`
+4. `python scripts/eval_hmm.py --tune` -> decoder tuning on train trips (`artifacts/hmm_config.json`, `results/optuna_trials_hmm.csv`), then `results/hmm_comparison.csv` on student-test. See "HMM/Viterbi decoding" below.
 5. `python scripts/make_plots.py` and `python scripts/make_maps.py` -> `results/figures`, `results/maps`
 
 ## Run the demo
@@ -196,3 +196,21 @@ wrapper and has been checked for load, prediction shape and probability output.
 The current API and HMM modules are placeholders and contain no active model
 loader, so end-to-end API/HMM integration is not verified by this repository
 checkout.
+
+## HMM/Viterbi decoding
+
+`pathsnap/hmm.py` turns the classifier's per-point probabilities into one continuous route.
+Hidden states are each GPS point's candidate arcs. The emission is
+`log max(p, 1e-6) - w * dist^2 / (2 sigma^2)`. The transition is `-|d_route - d_gc| / beta`, where
+`d_route` is the network distance (Dijkstra over the cropped directed graph, capped at 2,000 m, with a U-turn
+penalty). The chain restarts at every GPS segment and wherever no transition is reachable (counted as a break).
+`pathsnap/pipeline.py` calls it for the API, and `route_from_points` fills gaps with shortest paths.
+
+```powershell
+python scripts/eval_hmm.py --tune --n-trials 40   # TPE on 12 train trips (seed 42), then student-test
+python scripts/eval_hmm.py --defaults             # untuned decoder baseline
+python -m pytest -q tests/test_hmm.py
+```
+
+Student-test, final tuned MLP (19,160 points): Top-1 0.826 classifier-only vs 0.933 with the HMM. Continuity
+goes from 0.963 to 0.999, and all 10 trips improve. Per-trip numbers: `results/hmm_comparison.csv`.

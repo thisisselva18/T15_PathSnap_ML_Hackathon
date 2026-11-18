@@ -1,6 +1,41 @@
 {
-  "sigma_m": null,
-  "beta_m": null,
-  "emission_weight_w": null,
-  "uturn_penalty": null
+  "sigma_m": 7.919097875725247,
+  "beta_m": 2.361682128541866,
+  "dist_weight": 0.7234994650243598,
+  "uturn_penalty_m": 146.79576393256772,
+  "max_route_m": 2000.0,
+  "p_floor": 1e-06,
+  "min_move_m": 0.0,
+  "_tuning": {
+    "objective": "mean per-trip HMM Top-1 on train trips (all points)",
+    "trips": [
+      "00000008",
+      "00000010",
+      "00000020",
+      "00000038",
+      "00000050",
+      "00000057",
+      "00000064",
+      "00000068",
+      "00000080",
+      "00000090",
+      "00000093",
+      "00000098"
+    ],
+    "trip_selection": "numpy default_rng(42).choice, 12 of 80 train trips",
+    "sampler": {
+      "name": "TPESampler",
+      "seed": 42,
+      "n_startup_trials": 4,
+      "multivariate": true
+    },
+    "trial0": "untuned defaults",
+    "n_trials": 40,
+    "tuning_time_s": 36.0,
+    "default_top1": 0.8972,
+    "best_top1": 0.9026,
+    "best_trial": 37,
+    "model": "mlp",
+    "student_test_used_for_tuning": false
+  }
 }

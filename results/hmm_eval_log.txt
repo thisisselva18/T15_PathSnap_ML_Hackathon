@@ -1,0 +1,91 @@
+model: mlp
+tuning trips: ['00000008', '00000010', '00000020', '00000038', '00000050', '00000057', '00000064', '00000068', '00000080', '00000090', '00000093', '00000098']
+trial   0  top1 0.8972  best 0.8972
+trial   1  top1 0.8777  best 0.8972
+trial   2  top1 0.8976  best 0.8976
+trial   3  top1 0.8973  best 0.8976
+trial   4  top1 0.8881  best 0.8976
+trial   5  top1 0.8878  best 0.8976
+trial   6  top1 0.8911  best 0.8976
+trial   7  top1 0.8771  best 0.8976
+trial   8  top1 0.8991  best 0.8991
+trial   9  top1 0.8963  best 0.8991
+trial  10  top1 0.8982  best 0.8991
+trial  11  top1 0.8975  best 0.8991
+trial  12  top1 0.8949  best 0.8991
+trial  13  top1 0.8967  best 0.8991
+trial  14  top1 0.8944  best 0.8991
+trial  15  top1 0.8901  best 0.8991
+trial  16  top1 0.8969  best 0.8991
+trial  17  top1 0.8969  best 0.8991
+trial  18  top1 0.8975  best 0.8991
+trial  19  top1 0.8996  best 0.8996
+trial  20  top1 0.9022  best 0.9022
+trial  21  top1 0.8976  best 0.9022
+trial  22  top1 0.8971  best 0.9022
+trial  23  top1 0.8946  best 0.9022
+trial  24  top1 0.9002  best 0.9022
+trial  25  top1 0.9011  best 0.9022
+trial  26  top1 0.8907  best 0.9022
+trial  27  top1 0.8990  best 0.9022
+trial  28  top1 0.8984  best 0.9022
+trial  29  top1 0.8947  best 0.9022
+trial  30  top1 0.8978  best 0.9022
+trial  31  top1 0.8995  best 0.9022
+trial  32  top1 0.8985  best 0.9022
+trial  33  top1 0.8977  best 0.9022
+trial  34  top1 0.9025  best 0.9025
+trial  35  top1 0.8990  best 0.9025
+trial  36  top1 0.8981  best 0.9025
+trial  37  top1 0.9026  best 0.9026
+trial  38  top1 0.8990  best 0.9026
+trial  39  top1 0.9023  best 0.9026
+defaults 0.8972 -> best 0.9026 (trial 37); wrote artifacts\hmm_config.json
+00000000  pts  2503  seg 1  breaks 2  top1 clf 0.930 -> hmm 0.958 (geom-only 0.965, ceiling 0.998)  cont 0.978 -> 0.999  0.6s
+00000007  pts  1354  seg 1  breaks 0  top1 clf 0.911 -> hmm 0.995 (geom-only 0.999, ceiling 1.000)  cont 0.996 -> 1.000  0.4s
+00000009  pts  1049  seg 1  breaks 0  top1 clf 0.828 -> hmm 0.894 (geom-only 0.835, ceiling 0.981)  cont 0.969 -> 0.998  0.5s
+00000040  pts  2995  seg 2  breaks 0  top1 clf 0.888 -> hmm 0.966 (geom-only 0.968, ceiling 1.000)  cont 0.983 -> 1.000  0.7s
+00000052  pts   262  seg 1  breaks 0  top1 clf 0.943 -> hmm 0.992 (geom-only 0.973, ceiling 1.000)  cont 0.973 -> 1.000  0.1s
+00000056  pts  3958  seg 1  breaks 1  top1 clf 0.870 -> hmm 0.961 (geom-only 0.938, ceiling 0.993)  cont 0.927 -> 0.999  1.4s
+00000065  pts   768  seg 2  breaks 0  top1 clf 0.811 -> hmm 0.858 (geom-only 0.857, ceiling 0.999)  cont 0.956 -> 0.997  0.3s
+00000076  pts  1486  seg 1  breaks 0  top1 clf 0.799 -> hmm 0.937 (geom-only 0.925, ceiling 0.993)  cont 0.952 -> 0.999  1.0s
+00000077  pts  3911  seg 1  breaks 0  top1 clf 0.641 -> hmm 0.861 (geom-only 0.852, ceiling 0.997)  cont 0.971 -> 1.000  1.4s
+00000091  pts   874  seg 1  breaks 0  top1 clf 0.825 -> hmm 0.944 (geom-only 0.916, ceiling 1.000)  cont 0.940 -> 1.000  0.4s
+{
+  "trips": 10,
+  "points": 19160,
+  "breaks": 3,
+  "fixed_by_hmm": 2391,
+  "broken_by_hmm": 329,
+  "trips_improved": 10,
+  "trips_worse": 0,
+  "cand_hit_rate_pointweighted": 0.996,
+  "cand_hit_rate_tripmean": 0.996,
+  "top1_clf_pointweighted": 0.8258,
+  "top1_clf_tripmean": 0.8447,
+  "top1_hmm_pointweighted": 0.9334,
+  "top1_hmm_tripmean": 0.9367,
+  "top1_hmm_geom_only_pointweighted": 0.9223,
+  "top1_hmm_geom_only_tripmean": 0.9227,
+  "top1_clf_reliable_pointweighted": 0.827,
+  "top1_clf_reliable_tripmean": 0.8453,
+  "top1_hmm_reliable_pointweighted": 0.9348,
+  "top1_hmm_reliable_tripmean": 0.9373,
+  "continuity_clf_pointweighted": 0.963,
+  "continuity_clf_tripmean": 0.9646,
+  "continuity_hmm_pointweighted": 0.9994,
+  "continuity_hmm_tripmean": 0.9993,
+  "route_precision_clf_pointweighted": 0.5926,
+  "route_precision_clf_tripmean": 0.5809,
+  "route_recall_clf_pointweighted": 0.9931,
+  "route_recall_clf_tripmean": 0.9924,
+  "route_precision_hmm_pointweighted": 0.9068,
+  "route_precision_hmm_tripmean": 0.9111,
+  "route_recall_hmm_pointweighted": 0.9947,
+  "route_recall_hmm_tripmean": 0.9915,
+  "time_total_s_mean": 0.68,
+  "time_hmm_s_mean": 0.59,
+  "split": "student_test",
+  "config": "artifacts/hmm_config.json",
+  "model": "mlp"
+}

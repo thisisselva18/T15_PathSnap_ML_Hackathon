@@ -5,8 +5,9 @@ Owner: P2 (written by P1)
     bundle = load_bundle()                      # artifacts/model.joblib: {"model", "features", "model_name", ...}
     pred, ctx = predict_trip(trip_dir, bundle)  # per-point arcs (classifier-only and decoded), route, continuity, timings
 
-Decoding: if pathsnap.hmm provides the agreed interface (RoadGraph, decode, load_hmm_cfg), the HMM/Viterbi decoder
-is used. Until then the decoder falls back to the classifier's best candidate per point, and pred["decoder"] says so.
+Decoding: pathsnap.hmm (RoadGraph + Viterbi). The predicted route fills gaps between matched arcs with shortest paths
+and continuity uses the network, both via pathsnap.hmm. If the HMM fails on a trip, the decoder falls back to the
+classifier's best candidate per point and pred["decoder"] says so.
 """
 import time
 from pathlib import Path
@@ -46,19 +47,18 @@ def classifier_best(c, proba, n_points):
     return best
 
 
-def decode(c, proba, ctx, clf_arcs):
-    """HMM/Viterbi decoding via pathsnap.hmm when it is implemented; otherwise classifier-only fallback.
-    Returns (arc per point, number of HMM breaks, decoder name)."""
+def decode(c, proba, ctx, clf_arcs, hmm_cfg=None):
+    """HMM/Viterbi decoding via pathsnap.hmm; classifier-only fallback if it fails.
+    Returns (arc per point, number of HMM breaks, decoder name, RoadGraph or None)."""
+    graph = None
     try:
         from . import hmm
-        if not all(hasattr(hmm, f) for f in ("RoadGraph", "decode", "load_hmm_cfg")):
-            raise NotImplementedError("pathsnap.hmm does not provide RoadGraph/decode/load_hmm_cfg yet")
-        cfg = hmm.load_hmm_cfg()
+        cfg = hmm_cfg or hmm.load_hmm_cfg()
         graph = hmm.RoadGraph(ctx["u"], ctx["v"], ctx["A"], ctx["B"], ctx["keep"], cfg["max_route_m"])
         arcs, breaks = hmm.decode(c, proba, ctx["txy"], ctx["seg_id"], graph, cfg)
-        return np.asarray(arcs, dtype=np.int64), int(breaks), "hmm_viterbi"
+        return np.asarray(arcs, dtype=np.int64), int(breaks), "hmm_viterbi", graph
     except Exception as e:  # noqa: BLE001 - any HMM failure falls back, and is reported, never hidden
-        return clf_arcs.copy(), 0, f"classifier_only (HMM unavailable: {type(e).__name__})"
+        return clf_arcs.copy(), 0, f"classifier_only (HMM unavailable: {type(e).__name__}: {e})", graph
 
 
 def continuity(point_arcs, seg_id, u, v):
@@ -82,8 +82,9 @@ def route_segments(point_arcs, seg_id):
     return out
 
 
-def predict_trip(trip_dir, bundle):
-    """Full prediction for one trip folder. Never opens .route."""
+def predict_trip(trip_dir, bundle, hmm_cfg=None):
+    """Full prediction for one trip folder. Never opens .route.
+    ctx also gets "cands", "proba" and "graph" so evaluation and maps can reuse them without recomputing."""
     timings = {}
     t0 = time.perf_counter()
     c, ctx = prepare_trip(trip_dir)
@@ -97,11 +98,20 @@ def predict_trip(trip_dir, bundle):
     timings["classify"] = time.perf_counter() - t1
 
     t2 = time.perf_counter()
-    hmm_arcs, breaks, decoder = decode(c, proba, ctx, clf_arcs)
+    hmm_arcs, breaks, decoder, graph = decode(c, proba, ctx, clf_arcs, hmm_cfg)
     timings["hmm"] = time.perf_counter() - t2
-    timings["predict_total"] = time.perf_counter() - t0
 
     seg_id, u, v = ctx["seg_id"], ctx["u"], ctx["v"]
+    if graph is not None:
+        from . import hmm
+        routes = hmm.route_from_points(hmm_arcs, seg_id, graph)
+        cont = lambda arcs: hmm.continuity(arcs, seg_id, graph, ctx["txy"])
+    else:
+        routes = route_segments(hmm_arcs, seg_id)
+        cont = lambda arcs: continuity(arcs, seg_id, u, v)
+    cont_clf, cont_hmm = cont(clf_arcs), cont(hmm_arcs)
+    timings["predict_total"] = time.perf_counter() - t0
+    ctx.update(cands=c, proba=proba, graph=graph)
     pred = {
         "trip_id": ctx["trip_id"],
         "model": bundle["model_name"],
@@ -112,9 +122,9 @@ def predict_trip(trip_dir, bundle):
         "n_hmm_breaks": breaks,
         "clf_arcs": clf_arcs,
         "hmm_arcs": hmm_arcs,
-        "route_segments": route_segments(hmm_arcs, seg_id),
-        "continuity_clf": continuity(clf_arcs, seg_id, u, v),
-        "continuity_hmm": continuity(hmm_arcs, seg_id, u, v),
+        "route_segments": routes,
+        "continuity_clf": cont_clf,
+        "continuity_hmm": cont_hmm,
         "timings_s": {k: round(x, 3) for k, x in timings.items()},
     }
     return pred, ctx
