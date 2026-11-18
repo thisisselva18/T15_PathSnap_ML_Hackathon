@@ -1,0 +1,10 @@
+{
+  "seed": 42,
+  "row_cap": 150000,
+  "actual_rows": 150000,
+  "actual_observations": 26196,
+  "training_stride": 3,
+  "max_reference_distance_m": 50.0,
+  "sampling_unit": "whole eligible (trip_id, obs_idx) groups, including selected observations with no candidates",
+  "top1_population": "selected eligible training observation manifest; observations with no candidates count incorrect"
+}

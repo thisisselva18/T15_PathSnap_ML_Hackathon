@@ -10,7 +10,7 @@ FEATURES = [
     "dist", "cand_rank", "dist_minus_min", "dist_ratio", "n_cands",          # geometry vs other candidates
     "t_frac", "past_end", "arc_len",                                         # position along the arc
     "head_diff", "head_cos", "head_valid", "speed", "dt_prev",               # direction / motion
-    "ctx_mean_dist", "dist_prev", "dist_next",                               # temporal context (+-2 points)
+    "ctx_mean_dist", "dist_prev",                                             # causal temporal context
     "out_deg_v", "in_deg_u", "has_twin", "conn_prev_top3",                   # topology
 ]
 
@@ -32,15 +32,12 @@ def add_features(c, txy, t, seg_id, A, B, u, v, out_deg, in_deg, twin):
     c["arc_len"] = np.hypot(bx - ax, by - ay)
 
     # --- neighbours inside the same segment (clipped at segment edges)
-    def nb(o):
-        j = np.clip(np.arange(N) + o, 0, N - 1)
-        return np.where(seg_id[j] == seg_id, j, np.arange(N))
-
-    prv, nxt = nb(-1), nb(1)
-    vec = txy[nxt] - txy[prv]
+    idx = np.arange(N)
+    prv = np.where((idx > 0) & (seg_id[np.maximum(idx - 1, 0)] == seg_id), np.maximum(idx - 1, 0), idx)
+    vec = txy - txy[prv]
     move = np.hypot(vec[:, 0], vec[:, 1])
     head = np.arctan2(vec[:, 1], vec[:, 0])
-    span = t[nxt] - t[prv]
+    span = t - t[prv]
     speed = np.where(span > 0, move / np.where(span > 0, span, 1), 0.0)
     head_valid = (move >= 2.0).astype(np.int8)         # heading is noise when (nearly) stopped
     bearing = np.arctan2(by - ay, bx - ax)
@@ -52,13 +49,13 @@ def add_features(c, txy, t, seg_id, A, B, u, v, out_deg, in_deg, twin):
     c["speed"] = speed[i]
     c["dt_prev"] = np.minimum(np.diff(t, prepend=t[0]), 600.0)[i]
 
-    # --- temporal context: distance of neighbouring points to the same arc
-    ds = []
-    for o in (-2, -1, 1, 2):
-        j = nb(o)[i]
-        ds.append(point_segment(txy[j, 0], txy[j, 1], ax, ay, bx, by)[0])
-    c["dist_prev"], c["dist_next"] = ds[1], ds[2]
-    c["ctx_mean_dist"] = (ds[0] + ds[1] + c["dist"].to_numpy() + ds[2] + ds[3]) / 5.0
+    # --- causal context: current and up to two previous points within this segment
+    prev1 = prv
+    prev2 = np.where((prev1 > 0) & (seg_id[np.maximum(prev1 - 1, 0)] == seg_id), np.maximum(prev1 - 1, 0), prev1)
+    dprev = point_segment(txy[prev1[i], 0], txy[prev1[i], 1], ax, ay, bx, by)[0]
+    dprev2 = point_segment(txy[prev2[i], 0], txy[prev2[i], 1], ax, ay, bx, by)[0]
+    c["dist_prev"] = dprev
+    c["ctx_mean_dist"] = (dprev2 + dprev + c["dist"].to_numpy()) / 3.0
 
     # --- topology
     c["out_deg_v"] = out_deg[v[a]]

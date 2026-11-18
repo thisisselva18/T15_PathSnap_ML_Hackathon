@@ -20,6 +20,7 @@ def load_trip(trip_dir, with_route=False):
         "nodes": rd("nodes", ["lon", "lat"]),
         "arcs": rd("arcs", ["u", "v"]),
     }
+    out["track"].insert(0, "obs_idx", range(len(out["track"])))
     if with_route:
         out["route"] = rd("route", ["arc_id"])["arc_id"].to_numpy()
     return out

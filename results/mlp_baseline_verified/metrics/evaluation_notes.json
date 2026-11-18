@@ -1,0 +1,9 @@
+{
+  "selected_classifier": "MLP",
+  "discontinued_classifier": "KNN; historical code and results retained, excluded from active evaluation",
+  "classification_target": "binary candidate correctness",
+  "roc": "one-vs-rest from saved predict_proba values; macro averages defined class curves; micro pools one-hot decisions",
+  "missing_classes": "classes with no positive or no negative examples have no individual ROC curve and are listed in undefined_roc_classes; macro averages valid class curves only",
+  "top1": "mean over the full supplied observation manifest; highest probability candidate correctness per observation; observations with no candidates count wrong",
+  "candidate_generation_metrics": "saved separately in candidate_generation_metrics.csv"
+}
