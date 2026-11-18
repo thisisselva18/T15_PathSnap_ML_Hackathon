@@ -1,0 +1,16 @@
+{
+ "model": "lgbm",
+ "best_params": {
+  "learning_rate": 0.028145092716060652,
+  "num_leaves": 65,
+  "max_depth": 7,
+  "min_child_samples": 26,
+  "subsample": 0.8059264473611898,
+  "colsample_bytree": 0.569746930326021,
+  "reg_lambda": 4.258943089524393e-06,
+  "n_estimators": 350
+ },
+ "best_cv3_top1": 0.8422192957557325,
+ "n_trials": 10,
+ "tuning_time_s": 663.7289771000069
+}
