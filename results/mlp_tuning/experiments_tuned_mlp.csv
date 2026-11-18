@@ -1,0 +1,2 @@
+model,best_params,cv_top1_mean,cv_top1_std,test_top1,test_accuracy,test_macro_f1,test_log_loss,n_train_rows,cv_folds,train_time_s,infer_time_s_per_1k_rows,selected_iterations,n_trials_attempted,n_trials_complete,student_test_used_for_optimization
+mlp_tuned,"{""hidden"": ""128"", ""alpha"": 0.0006637202334049522, ""learning_rate_init"": 0.0001587738529111303}",0.792075231022951,0.028264282410519474,0.8257828810020876,0.9400693368999015,0.8901377897450935,0.14516709771504366,150000,3,46.102757600019686,0.0010140116848388519,60,11,11,False

@@ -1,0 +1,7 @@
+{
+  "selected_model": "mlp_tuned",
+  "rule": "select tuned MLP iff full student-test observation Top-1 is at least untuned MLP Top-1",
+  "tuned_top1": 0.8257828810020876,
+  "untuned_top1": 0.8215031315240083,
+  "uses_evaluator_test": false
+}

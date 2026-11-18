@@ -146,13 +146,15 @@ def grouped_validation_indices(groups, validation_fraction=0.2, seed=SEED):
     return fit_idx, val_idx
 
 
-def select_mlp_iterations(X, y, groups, seed=SEED, max_iter=60, patience=8):
+def select_mlp_iterations(X, y, groups, seed=SEED, max_iter=60, patience=8,
+                          hidden_layer_sizes=(64, 32), alpha=1e-4,
+                          learning_rate_init=1e-3):
     """Choose MLP iterations by validation log loss on held-out trips, never random rows."""
     fit_idx, val_idx = grouped_validation_indices(groups, seed=seed)
     scaler = StandardScaler().fit(X[fit_idx])
     x_fit, x_val = scaler.transform(X[fit_idx]), scaler.transform(X[val_idx])
-    estimator = MLPClassifier(hidden_layer_sizes=(64, 32), activation="relu", solver="adam",
-                              alpha=1e-4, learning_rate_init=1e-3, batch_size="auto",
+    estimator = MLPClassifier(hidden_layer_sizes=hidden_layer_sizes, activation="relu", solver="adam",
+                              alpha=alpha, learning_rate_init=learning_rate_init, batch_size="auto",
                               max_iter=1, early_stopping=False, random_state=seed)
     best_loss, best_iter, rounds_without_improvement = np.inf, 1, 0
     classes = np.array([0, 1])
