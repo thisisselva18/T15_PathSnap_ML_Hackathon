@@ -49,7 +49,7 @@ SEED = 42
 KEY_COLS = ["trip_id", "seg_id", "obs_idx", "t", "cand_rank", "arc_id", "label", "ref_arc_id", "ref_dist", "t_raw"]
 # KNN and the other classifiers remain in build_model as historical implementations;
 # the active training entry point is intentionally MLP-only.
-MODELS = ["mlp"]
+MODELS = ["mlp", "logreg", "lgbm", "rf", "knn"]  # non-MLP models re-run on the 19-feature set for a fair comparison
 
 COLUMNS = ["model", "family", "laptop", "params_json", "seed", "n_train_rows", "cv_folds",
            "cv_macro_f1_mean", "cv_macro_f1_std", "cv_top1_mean", "cv_top1_std", "cv_log_loss_mean",
@@ -325,7 +325,10 @@ def main():
             cv["selected_mlp_iterations"].append(chosen_iter)
             print(f"  fold {k}: grouped stopping selected {chosen_iter} iterations (inner log loss {inner_loss:.5f})")
         m = build_model(a.model, fold_params)[1]
-        fit_mlp_epochs(m, X[trn], y[trn], fold_params["max_iter"])
+        if a.model == "mlp":
+            fit_mlp_epochs(m, X[trn], y[trn], fold_params["max_iter"])
+        else:
+            m.fit(X[trn], y[trn])
         X_val = cv_candidates.loc[val, feats].to_numpy(np.float32)
         y_val = cv_candidates.loc[val, "label"].to_numpy()
         p = positive_probability(m, X_val)
@@ -343,7 +346,10 @@ def main():
     final_params = {"max_iter": int(np.median(cv["selected_mlp_iterations"]))} if a.model == "mlp" else {}
     family, model = build_model(a.model, final_params)
     t0 = time.perf_counter()
-    fit_mlp_epochs(model, X, y, final_params["max_iter"])
+    if a.model == "mlp":
+        fit_mlp_epochs(model, X, y, final_params["max_iter"])
+    else:
+        model.fit(X, y)
     train_time = time.perf_counter() - t0
     train_top1 = top1(tr, positive_probability(model,X), sample_manifest)
     pte, tm = evaluate_on_test(model, te, feats, data_dir=data_dir)
