@@ -38,8 +38,21 @@ artifacts/models/*
 !artifacts/models/mlp_baseline_verified/
 artifacts/models/mlp_baseline_verified/*
 !artifacts/models/mlp_baseline_verified/mlp.joblib
+!artifacts/models/mlp_tuned.joblib
 
 # Generated experiment outputs are local except for the authoritative MLP-only
 # baseline reports, predictions, plots, and configuration.
 results/*
 !results/mlp_baseline_verified/
+!results/mlp_tuning/
+!results/experiments_L2.csv
+!results/confusion/
+results/confusion/*
+!results/confusion/mlp.csv
+!results/confusion/mlp.png
+!results/confusion/knn.csv
+!results/confusion/knn.png
+!results/curves/
+results/curves/*
+!results/curves/mlp.json
+!results/curves/mlp.png
