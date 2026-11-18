@@ -56,6 +56,8 @@ def prepare_trip(trip_dir, cfg=None):
     c.insert(3, "t", t[c["obs_idx"].to_numpy()])
     c[FEATURES] = c[FEATURES].astype(np.float32)
 
+    # keep: cropped arc ids (RoadGraph is built over these); nodes_ll: node lon/lat for drawing routes in the UI/maps
     ctx = dict(trip_id=raw["trip_id"], track=track, txy=txy, nxy=nxy, t=t, seg_id=seg_id, u=u, v=v,
-               A=A, B=B, epsg=epsg, n_arcs=len(u), n_arcs_cropped=len(keep), original_obs_idx=original_obs_idx)
+               A=A, B=B, epsg=epsg, n_arcs=len(u), n_arcs_cropped=len(keep), original_obs_idx=original_obs_idx,
+               keep=keep, nodes_ll=raw["nodes"][["lon", "lat"]].to_numpy())
     return c, ctx
