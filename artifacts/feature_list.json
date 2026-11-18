@@ -1,1 +1,22 @@
-[]
+[
+ "dist",
+ "cand_rank",
+ "dist_minus_min",
+ "dist_ratio",
+ "n_cands",
+ "t_frac",
+ "past_end",
+ "arc_len",
+ "head_diff",
+ "head_cos",
+ "head_valid",
+ "speed",
+ "dt_prev",
+ "ctx_mean_dist",
+ "dist_prev",
+ "dist_next",
+ "out_deg_v",
+ "in_deg_u",
+ "has_twin",
+ "conn_prev_top3"
+]
