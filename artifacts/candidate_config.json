@@ -3,5 +3,6 @@
   "k": 8,
   "gap_s": 60,
   "max_speed_ms": 70,
+  "crop_margin_m": 200,
   "obs_stride_for_training": 3
 }

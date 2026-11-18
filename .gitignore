@@ -14,3 +14,7 @@ Thumbs.db
 .idea/
 # secrets
 .env
+
+# per-model files shared via Drive, not git (can be large)
+artifacts/models/
+results/preds/
