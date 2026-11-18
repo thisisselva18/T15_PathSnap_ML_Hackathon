@@ -103,6 +103,9 @@ def pct(x):
 
 
 st.subheader(f"Trip {res.get('trip_id')} - model {res.get('model', '?')}")
+decoder = res.get("decoder", "hmm_viterbi")
+if not decoder.startswith("hmm"):
+    st.info(f"Decoder: {decoder}. The 'classifier + HMM' figures equal classifier-only until the HMM is deployed.")
 if not m.get("ground_truth_available", False):
     st.warning("No reference route on the server for this trip: accuracy metrics are not available.")
 
