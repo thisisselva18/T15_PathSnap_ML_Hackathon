@@ -75,6 +75,7 @@ def main():
     data_dir = Path(args.data_dir)
     if not data_dir.is_absolute():
         data_dir = ROOT / data_dir
+    data_label = data_dir.relative_to(ROOT).as_posix() if data_dir.is_relative_to(ROOT) else str(data_dir)
     smoke = args.max_rows < 150000 or args.n_trials < 8
     out = Path(args.output_dir) if args.output_dir else ROOT / "results" / ("mlp_tuning_smoke" if smoke else "mlp_tuning")
     if not out.is_absolute():
@@ -170,7 +171,7 @@ def main():
         "n_trials_attempted": len(study.trials), "n_trials_complete": len(completed),
         "n_trials_failed": sum(t.state == optuna.trial.TrialState.FAIL for t in study.trials),
         "tuning_time_s": tune_seconds, "sampler": {"name": "TPESampler", "seed": SEED,
-        "n_startup_trials": 4, "multivariate": True}, "data_dir": str(data_dir),
+        "n_startup_trials": 4, "multivariate": True}, "data_dir": data_label,
         "n_training_rows": len(tr), "feature_schema": features,
         "cv_top1_population": "All eligible training observation manifest in each held-out trip fold; observations without candidates count incorrect.",
         "iteration_selection": "Grouped held-trip inner validation, minimum log loss; final epoch count is median across best trial's three outer folds.",
@@ -205,7 +206,7 @@ def main():
     artifact = {"model": model, "features": list(features), "model_name": "mlp",
                 "params": best_params, "run_tag": "mlp_tuning_smoke" if smoke else "mlp_tuned",
                 "training_rows": len(tr), "selected_iterations": final_epochs,
-                "data_dir": str(data_dir), "sampler": "TPE", "student_test_used_for_optimization": False}
+                "data_dir": data_label, "sampler": "TPE", "student_test_used_for_optimization": False}
     joblib.dump(artifact, model_path)
 
     # Only now load and score the student-test partition, exactly once for selection.
