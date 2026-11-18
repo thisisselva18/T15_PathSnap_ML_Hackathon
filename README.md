@@ -132,3 +132,60 @@ decision. Training executes exactly the selected number of epochs with
 `partial_fit`, avoiding sklearn's `max_iter` warning for an intentional stopping
 checkpoint. The selected fold counts and final epoch loss history are saved with
 the run artifacts.
+
+### MLP Bayesian tuning and final selection
+
+The team selected MLP as the sole active classifier. KNN remains in the
+five-model untuned comparison as a historical result and is not tuned. The
+LightGBM row and its earlier exploratory tuning outputs are historical; no new
+LightGBM tuning was performed for this selection.
+
+Reproduce the full search from the repository root with:
+
+```powershell
+python scripts/tune_bayes.py --model mlp --max-rows 150000 --n-trials 30 --timeout 900
+```
+
+The tuner reads `data/processed/post_correction/`, samples complete eligible
+observation groups up to 150,000 candidate rows using the shared seed and feature
+schema, and optimizes mean observation-manifest Top-1 over three trip-grouped
+folds. The inner epoch selection also holds out whole trips and minimizes
+validation log loss. Observations without candidates count as incorrect. Student
+test and evaluator-test data are excluded from the optimization objective; the
+student-test partition is scored once after tuning for the predeclared MLP
+selection rule. The evaluator-test partition is never loaded.
+
+Optuna uses `TPESampler(seed=42, n_startup_trials=4, multivariate=True)`. Trial 0
+is enqueued with the untuned defaults (`64-32`, `alpha=0.0001`,
+`learning_rate_init=0.001`); trials 1–3 are startup samples and subsequent trials
+use TPE proposals. The search space is hidden layer size `{64, 128, 64-32,
+128-64}`, `alpha` in `[1e-6, 1e-2]` log-uniform, and initial learning rate in
+`[1e-4, 1e-2]` log-uniform. SQLite study, trial log, best parameters, metrics,
+student-test predictions, reports and plots are saved under
+`results/mlp_tuning/`; the separate fitted pipeline is
+`artifacts/models/mlp_tuned.joblib`. The selected classifier is installed at
+`artifacts/model.joblib`. The prior LightGBM artifact is preserved locally at
+`artifacts/models/lgbm_exploratory_preserved.joblib` and in Git history.
+
+The recorded search completed 11 trials (0 failed). Best parameters were
+`hidden=128`, `alpha=0.0006637202`, and `learning_rate_init=0.0001587732`.
+On the same corrected 150k training sample and student-test population, untuned
+MLP Top-1 was `0.821503` and tuned MLP Top-1 was `0.825783`; therefore tuned MLP
+was selected. Candidate accuracy was `0.939541` vs `0.940069`, macro F1 was
+`0.890912` vs `0.890138`, weighted F1 was `0.939286` vs `0.939328`, ROC-AUC was
+`0.974966` vs `0.975345`, and log loss was `0.147097` vs `0.145167` (untuned vs
+tuned). Train time was `4.78s` vs `46.10s`; student-test inference time was
+`0.105s` vs `0.115s`. On the comparable three-fold
+grouped CV, untuned-default vs best-trial Top-1 was `0.791490 ± 0.027450` vs
+`0.792075 ± 0.028264`. The tuned run's 900-second Optuna
+timeout was exceeded by an in-flight trial; total recorded search time was
+999.7 seconds. The slowest individual trial took `205.91s`; 11 trials completed
+and none failed. The saved database preserves all 11 trials and their durations.
+Historical untuned KNN Top-1 in the five-model comparison is `0.814301`; no KNN
+tuning was performed.
+
+The MLP artifact follows the repository's `{model, features, ...}` joblib
+wrapper and has been checked for load, prediction shape and probability output.
+The current API and HMM modules are placeholders and contain no active model
+loader, so end-to-end API/HMM integration is not verified by this repository
+checkout.
