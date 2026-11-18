@@ -21,4 +21,4 @@ df.to_csv(RESULTS / "experiments.csv", index=False)
 cols = ["model", "family", "laptop", "cv_macro_f1_mean", "cv_top1_mean", "cv_top1_std",
         "test_top1", "test_macro_f1", "test_log_loss", "train_time_s", "infer_time_s_per_1k_rows"]
 print(df[cols].to_string(index=False, float_format=lambda x: f"{x:.4f}"))
-print(f"\nSelected for Bayesian optimisation: {df.iloc[0]['model']}")
+print("\nMLP is selected for Bayesian optimisation by team decision; the ranking above is the five-model historical baseline.")

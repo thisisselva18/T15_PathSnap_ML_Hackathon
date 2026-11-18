@@ -43,3 +43,14 @@ artifacts/models/mlp_baseline_verified/*
 # baseline reports, predictions, plots, and configuration.
 results/*
 !results/mlp_baseline_verified/
+!results/experiments_L2.csv
+!results/confusion/
+results/confusion/*
+!results/confusion/mlp.csv
+!results/confusion/mlp.png
+!results/confusion/knn.csv
+!results/confusion/knn.png
+!results/curves/
+results/curves/*
+!results/curves/mlp.json
+!results/curves/mlp.png
